@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu de la Semaine</title>
+    <style>
+        /* Add your styling here */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #4CAF50;
+        }
+        .day-menu {
+            margin-bottom: 40px;
+        }
+        .recipe {
+            margin-bottom: 20px;
+        }
+        .recipe img {
+            max-width: 100px;
+            border-radius: 8px;
+        }
+        .recipe button {
+            display: block;
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Mon Menu de la Semaine</h1>
+    </header>
+
+    <div id="menu-container">
+        <!-- The dynamic content will be inserted here -->
+    </div>
+
+    <script>
+        const sheetUrl = 'https://spreadsheets.google.com/feeds/cells/YOUR_SHEET_ID/1/public/full?alt=json'; // Change YOUR_SHEET_ID
+
+        fetch(sheetUrl)
+            .then(response => response.json())
+            .then(data => {
+                const menuContainer = document.getElementById('menu-container');
+                const daysOfWeek = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+                const startRow = 2;  // Adjust based on your Google Sheets structure
+                const startCol = 3;  // Monday column (C) is index 3
+
+                daysOfWeek.forEach((day, index) => {
+                    const dayMenu = document.createElement('div');
+                    dayMenu.classList.add('day-menu');
+                    dayMenu.innerHTML = `<h2>${day}</h2>`;
+
+                    // Lunch
+                    const lunchRecipe = createRecipeElement(data, startRow, startCol + index);
+                    dayMenu.appendChild(lunchRecipe);
+
+                    // Dinner
+                    const dinnerRecipe = createRecipeElement(data, startRow + 4, startCol + index);
+                    dayMenu.appendChild(dinnerRecipe);
+
+                    menuContainer.appendChild(dayMenu);
+                });
+            });
+
+        function createRecipeElement(data, row, col) {
+            const recipeDiv = document.createElement('div');
+            recipeDiv.classList.add('recipe');
+
+            const recipeName = getDataFromSheet(data, row, col);
+            const recipeImage = getDataFromSheet(data, row + 1, col);
+            const recipeLink = getDataFromSheet(data, row + 2, col);
+            const recipeIngredients = getDataFromSheet(data, row + 3, col);
+
+            recipeDiv.innerHTML = `
+                <h3>${recipeName}</h3>
+                <img src="${recipeImage}" alt="${recipeName}">
+                <p><a href="${recipeLink}" target="_blank">Voir la recette</a></p>
+                <p>${recipeIngredients}</p>
+                <button onclick="changeRecipe(this, ${col})">Changer la recette</button>
+            `;
+
+            return recipeDiv;
+        }
+
+        function getDataFromSheet(data, row, col) {
+            const cell = data.feed.entry.find(entry => entry.gs$cell.row == row && entry.gs$cell.col == col);
+            return cell ? cell.content.$t : '';
+        }
+
+        function changeRecipe(button, col) {
+            alert('Changer la recette functionality to be implemented');
+            // Add logic here to fetch a new random recipe and update the DOM
+        }
+    </script>
+</body>
+</html>
+"Initial commit with basic HTML structure"
